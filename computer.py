@@ -18,16 +18,13 @@ class computer(object):
         self.sock.bind((udp_ip, udp_port))
         while True:
             if has_token():
-                
-                
-                
-    '''            
-    def parse(packet):
-        if eu sou a máquina que o pacote quer
-            marcar que eu list
-    '''
+                if nickname in packet:  # ?
+                    
 
-    
+    def has_token():
+        pass
+
+
 '''
 <ip_destino_token>
 <apelido>
@@ -36,5 +33,5 @@ class computer(object):
      
 class token(object):
     """lol"""
-    def __init__():
-        
+    def __init__(self):
+        pass
