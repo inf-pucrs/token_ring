@@ -8,9 +8,9 @@ class Computer(object):
     """xd"""
 
     def __init__(self):
-        self.queue = deque()
         self.udp_port = 5000
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(("0.0.0.0",5000))
 
         
     # def start(self):
@@ -34,6 +34,7 @@ class Computer(object):
         
         
     def wait_connection(self):
+
         print(self.sock.recv(1024))
         
     def create_token(self):
