@@ -38,7 +38,8 @@ class Computer(object):
         
     def create_token(self):
         return
-        
+
+
 def is_token(packet):
     if packet[0] == 1234
         return True
@@ -60,16 +61,15 @@ class Packet(object):
     """Datagram: 2345;naocopiado:Bob:Alice:Oi Mundo!"""
     """Datagram: iden;statuscopy;origin;destination;msg"""
     """          0   ;1         ;2     ;3;         ;4"""
-    
-    read = False
-    
+
     def __init__(self, origin_nick: str, dest_nick: str, text: str):
         self.dest_nick = dest_nick
         self.dest_nick = dest_nick
         self.text = text
+        self.has_been_read = False
         
-    def read():
-        self.read = True
+    def read(self):
+        self.has_been_read = True
 
         
     def _pprint():
