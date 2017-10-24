@@ -9,8 +9,9 @@ class Computer(object):
 
     def __init__(self):
         self.udp_port = 5000
+        self.packet_queue = deque()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(("0.0.0.0",5000))
+        self.sock.bind(("0.0.0.0", 5000))
 
         
     # def start(self):
@@ -29,20 +30,20 @@ class Computer(object):
     #         pass
         
 
-    def connect(self, nickname, next_computer_address="127.0.0.1", next_computer_port=5000):
+    def connect(self, nickname, next_computer_address="localhost", next_computer_port=5000):
         self.sock.sendto(b"teste", (next_computer_address, next_computer_port))
         
         
     def wait_connection(self):
-
         print(self.sock.recv(1024))
-        
+
+
     def create_token(self):
         return
 
 
 def is_token(packet):
-    if packet[0] == 1234
+    if packet[0] == 1234:
         return True
     elif packet[0] == 2345:
         return False
@@ -63,23 +64,30 @@ class Packet(object):
     """Datagram: iden;statuscopy;origin;destination;msg"""
     """          0   ;1         ;2     ;3;         ;4"""
 
-    def __init__(self, origin_nick: str, dest_nick: str, text: str):
-        self.dest_nick = dest_nick
+    def __init__(self, packet_type: int, origin_nick: str, dest_nick: str, text: str):
+        self.packet_type = packet_type
+        self.origin_nick = origin_nick
         self.dest_nick = dest_nick
         self.text = text
         self.has_been_read = False
-        
+
+
     def read(self):
         self.has_been_read = True
 
         
-    def _pprint():
-        return "2345\n{}\n{}\n{}\n{}".format(self.read, self.dest_nick, self.dest_nick, self.text)
+    def _pprint(self):
+        return "{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.read, self.dest_nick, self.dest_nick, self.text)
         
         
     def __str__(self) -> str:
-        return "2345;{};{};{};{}".format(self.read, self.dest_nick, self.dest_nick, self.text)
+        return "{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.read, self.dest_nick, self.dest_nick, self.text)
         
         
 if __name__ == "__main__":
-    setup = read_file("")
+    # pc2 = Computer()
+    # pc2.connect("")
+    # pc1 = Computer()
+    # pc1.wait_connection()
+
+    # setup = read_file("")
