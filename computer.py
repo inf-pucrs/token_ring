@@ -13,24 +13,24 @@ class Computer(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         
-    def start(self):
-        self.sock.bind((self.udp_ip, self.udp_port))
-        while True:
-            # packet = sock.recv()  # get packets from socket, cast to str, split(';')
-            if not is_token(packet):
-                if packet[3] == packet.dest_nick:  # if I am the destination device of this packet
-                    #  packet[1] mark packet as read "OK"
-                    continue
-                else:
-                    # send the received Packet to the next computer
-            elif is_token(packet)
-                if len(self.queue) > 0:  # if I want to send messages
-                    # send message and queue.pop()
-                # pass token        
+    # def start(self):
+    #     while True:
+    #         # packet = sock.recv()  # get packets from socket, cast to str, split(';')
+    #         if not is_token(packet):
+    #             if packet[3] == packet.dest_nick:  # if I am the destination device of this packet
+    #                 #  packet[1] mark packet as read "OK"
+    #                 continue
+    #             else:
+    #                 # send the received Packet to the next computer
+    #         elif is_token(packet)
+    #             if len(self.queue) > 0:  # if I want to send messages
+    #                 # send message and queue.pop()
+    #             # pass token
+    #         pass
         
 
-    def connect(self,nickname, next_computer_address="127.0.0.1",next_computer_port = 5000):
-        self.sock.sendto(b"teste",(next_computer_address,next_computer_port))
+    def connect(self, nickname, next_computer_address="127.0.0.1", next_computer_port=5000):
+        self.sock.sendto(b"teste", (next_computer_address, next_computer_port))
         
         
     def wait_connection(self):
