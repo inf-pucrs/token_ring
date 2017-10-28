@@ -1,45 +1,53 @@
 #!bin/bash/python
-#! coding = utf-8
+# -*- coding: utf-8 -*-
+
 import socket
+from typing import Tuple
 from collections import deque
 
 
 class Computer(object):
     """xd"""
 
-    def __init__(self):
-        self.udp_port = 5000
-        self.packet_queue = deque()
+    def __init__(self, my_socket_address: Tuple[str, int] = ('localhost', 5000), tokenizer: bool=True):
+        self.address_to_host_server = my_socket_address
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind(("0.0.0.0", 5000))
+        self.sock.bind(self.address_to_host_server)
+        self.packet_queue = deque()
+        if tokenizer:
+            self.create_token()
 
-        
-    # def start(self):
-    #     while True:
-    #         # packet = sock.recv()  # get packets from socket, cast to str, split(';')
-    #         if not is_token(packet):
-    #             if packet[3] == packet.dest_nick:  # if I am the destination device of this packet
-    #                 #  packet[1] mark packet as read "OK"
-    #                 continue
-    #             else:
-    #                 # send the received Packet to the next computer
-    #         elif is_token(packet)
-    #             if len(self.queue) > 0:  # if I want to send messages
-    #                 # send message and queue.pop()
-    #             # pass token
-    #         pass
-        
+    def start(self):
+        '''
+        while True:
+            # packet = sock.recv()  # get packets from socket, cast to str, split(';')
+            if not is_token(packet):
+                if packet[3] == packet.dest_nick:  # if I am the destination device of this packet
+                    #  packet[1] mark packet as read "OK"
+                    continue
+                else:
+                    # send the received Packet to the next computer
+            elif is_token(packet)
+                if len(self.queue) > 0:  # if I want to send messages
+                    # send message and queue.pop()
+                # pass token
+        '''
+        pass
 
-    def connect(self, nickname, next_computer_address="localhost", next_computer_port=5000):
-        self.sock.sendto(b"teste", (next_computer_address, next_computer_port))
-        
-        
+    def connect(self, nickname, text=b"teste", next_computer_address: Tuple[str, int] = ('localhost', 6000)):
+        self.sock.sendto(text, next_computer_address)
+
     def wait_connection(self):
-        print(self.sock.recv(1024))
+        incoming = self.sock.recv(1024)
+        print(incoming)
+        return incoming
 
+    @staticmethod
+    def to_bytes(ass: Packet):
+        return bytes(str(ass), 'utf-8')
 
     def create_token(self):
-        return
+        return Packet(1234, '', '', '')
 
 
 def is_token(packet):
@@ -71,23 +79,32 @@ class Packet(object):
         self.text = text
         self.has_been_read = False
 
+    @staticmethod
+    def is_token(packet):
+        if packet[0] == 1234:
+            return True
+        elif packet[0] == 2345:
+            return False
 
     def read(self):
         self.has_been_read = True
 
-        
     def _pprint(self):
         return "{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.read, self.dest_nick, self.dest_nick, self.text)
-        
-        
+
     def __str__(self) -> str:
-        return "{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.read, self.dest_nick, self.dest_nick, self.text)
+        return "{}\n{}\n{}\n{}\n{}".format(
+            self.packet_type, self.has_been_read, self.dest_nick, self.dest_nick, self.text)
         
         
 if __name__ == "__main__":
-    # pc2 = Computer()
-    # pc2.connect("")
-    # pc1 = Computer()
-    # pc1.wait_connection()
+    from computer import Computer
+    pc1 = Computer(('localhost', 5000))
+    pc1.wait_connection()
+
+    pc2 = Computer(('localhost', 6000))
+    pc2.connect('', b"teste", ('localhost', 5000))
+
+    pc3 = Computer(('localhost', 7000))
 
     # setup = read_file("")
