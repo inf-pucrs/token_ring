@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import socket
+import time
 from typing import Tuple
 from collections import deque
 from packet import Packet
@@ -17,7 +18,8 @@ class Computer(object):
         """
         It gets a tuple to set where to host the server,
         another tuple to set where to send his packets
-        and a boolean to set whether it is the first computer on a network (defaults to false because this will only be used once)
+        and a boolean to set whether it is the first computer on a network
+        (defaults to false because this will only be used once)
         """
         self.ny_nickname = ny_nickname
         self.my_socket_address = my_socket_address
@@ -36,6 +38,7 @@ class Computer(object):
 
         while True:
             packet = Packet(*str(self.wait_connection()).split(';'))  # get packets from socket, cast to str, split(';')
+            time.sleep(0.75)
             if not packet.is_token():
                 if self.ny_nickname == packet.dest_nick:
                     # if I am the destination device of this packet
