@@ -5,16 +5,16 @@ class Packet(object):
 
     def __init__(self, packet_type: str, has_been_read: str,
                  origin_nick: str, dest_nick: str, text: str):
-        self.packet_type = int(packet_type)
+        self.packet_type = packet_type
         self.origin_nick = origin_nick
         self.dest_nick = dest_nick
         self.text = text
         self.has_been_read = has_been_read == 'OK'
 
     def is_token(self):
-        if self.packet_type == 1234:
+        if self.packet_type == '1234':
             return True
-        elif self.packet_type == 2345:
+        elif self.packet_type == '2345':
             return False
 
     def read(self):
@@ -22,7 +22,7 @@ class Packet(object):
 
     @staticmethod
     def assemble_token():
-        return Packet(1234, '', '', '')
+        return Packet('1234', '', '', '', '')
 
     def to_bytes(self):
         return bytes(str(self), 'utf-8')
@@ -40,6 +40,6 @@ class Packet(object):
 
 if __name__ == "__main__":
     pkt1 = Packet.assemble_token()
-    assert pkt1.packet_type == 1234
-    pkt2 = Packet(2345, 'me', 'him', 'Sample Text.')
+    assert pkt1.packet_type == '1234'
+    pkt2 = Packet('2345', '', 'me', 'him', 'Sample Text.')
     print(pkt2, pkt2._pprint())
