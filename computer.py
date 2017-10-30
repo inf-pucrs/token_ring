@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import socket
-from typing import Tuple
+from typing import Tuple, Deque
 from collections import deque
 from packet import Packet
 
@@ -10,8 +10,10 @@ from packet import Packet
 class Computer(object):
     """xd"""
 
-    def __init__(self, ny_nickname: str, my_socket_address: Tuple[str, int] = ('localhost', 5000),
-                 next_computer_address: Tuple[str, int] = ('localhost', 6000), tokenizer: bool=False):
+    def __init__(self, ny_nickname: str,
+                 my_socket_address: Tuple[str, int] = ('localhost', 5000),
+                 next_computer_address: Tuple[str, int] = ('localhost', 6000),
+                 tokenizer: bool=False):
         """
         It gets a tuple to set where to host the server,
         another tuple to set where to send his packets
@@ -25,42 +27,47 @@ class Computer(object):
         self.next_computer_address = next_computer_address
         self.packet_queue = deque()
         if tokenizer:
-            self.create_token()
+            self.pass_token()
 
     def start(self):
 
         while True:
             packet = Packet(*str(self.wait_connection()).split(';'))  # get packets from socket, cast to str, split(';')
-            if not Packet.is_token():
-                if self.ny_nickname == packet.dest_nick:  # if I am the destination device of this packet
+            if not packet.is_token():
+                if self.ny_nickname == packet.dest_nick:
+                    # if I am the destination device of this packet
                     packet.read()  # mark packet as read "OK"
                     self.connect(packet.to_bytes())  # send packet to next computer on the network
                 elif self.ny_nickname == packet.origin_nick:
                     # it means the packet I had sent to some computer on the network got back to me
                     if packet.has_been_read:
-                        # It's fine, discard packet or something
+                        print('Packet was read by destination machine.')
                         # pass token
                     else:
-                        #  SOMETHING WENT WRONG
-            elif Packet.is_token():
-                if len(self.packet_queue) > 0:  # if I want to send messages
+                        print('Packet was NOT READ by destination.')
+                else:
+                    # Packet was not sent TO me nor sent BY me.
+                    self.connect(packet.to_bytes())
+            elif packet.is_token():
+                if len(self.packet_queue) > 0:
+                    # if I want to send messages
                     self.connect(self.packet_queue.popleft().to_bytes())
                     # wait for packet to come back
                     continue
                 else:
-                   # pass token
+                   self.pass_token()
 
         pass
 
-    def connect(self, text=b"teste"):
+    def connect(self, text: bytes=b"teste"):
         self.sock.sendto(text, self.next_computer_address)
 
     def wait_connection(self):
-        incoming = self.sock.recv(1024)
+        incoming = self.sock.recv('1024')
         return incoming
 
-    def create_token(self):
-        return Packet(1234, '', '', '')
+    def pass_token(self):
+        self.connect(Packet('1234', '', '', '', '').to_bytes())
 
 
 def read_file(file_path: str) -> list:
