@@ -3,12 +3,13 @@ class Packet(object):
     """Datagram: iden;statuscopy;origin;destination;msg"""
     """          0   ;1         ;2     ;3          ;4"""
 
-    def __init__(self, packet_type: int, origin_nick: str, dest_nick: str, text: str):
-        self.packet_type = packet_type
+    def __init__(self, packet_type: str, has_been_read: str,
+                 origin_nick: str, dest_nick: str, text: str):
+        self.packet_type = int(packet_type)
         self.origin_nick = origin_nick
         self.dest_nick = dest_nick
         self.text = text
-        self.has_been_read = False
+        self.has_been_read = has_been_read == 'OK'
 
     def is_token(self):
         if self.packet_type == 1234:
@@ -27,11 +28,14 @@ class Packet(object):
         return bytes(str(self), 'utf-8')
 
     def _pprint(self):
-        return "\n{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.has_been_read, self.origin_nick, self.dest_nick, self.text)
+        return "\n{}\n{}\n{}\n{}\n{}".format(
+            self.packet_type, self.has_been_read,
+            self.origin_nick, self.dest_nick, self.text)
 
     def __str__(self) -> str:
         return "{};{};{};{};{}".format(
-            self.packet_type, self.has_been_read, self.origin_nick, self.dest_nick, self.text)
+            self.packet_type, self.has_been_read,
+            self.origin_nick, self.dest_nick, self.text)
 
 
 if __name__ == "__main__":
