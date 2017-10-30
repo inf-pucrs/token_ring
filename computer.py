@@ -28,21 +28,30 @@ class Computer(object):
     def start(self):
         '''
         while True:
-            # packet = sock.recv()  # get packets from socket, cast to str, split(';')
+            
+            packet = Packet(*str(wait_connection()).split(';'))  # get packets from socket, cast to str, split(';')
             if not is_token(packet):
-                if packet[3] == packet.dest_nick:  # if I am the destination device of this packet
-                    #  packet[1] mark packet as read "OK"
+                if self.nickname == packet.dest_nick:  # if I am the destination device of this packet
+                    packet.read()  # mark packet as read "OK"
+                    connect(to_bytes(str(packet)))  # send packet to next computer on the network
+                elif self.nickname == packet.origin_nick:
+                    # it means the packet I had sent to some computer on the network got back to me
+                    if packet.has_been_read:
+                        # It's fine, discard packet or something
+                        # pass token
+                    else:
+                        #  SOMETHING WENT WRONG
+            elif is_token(packet):
+                if len(self.queue) > 0:  # if I want to send messages
+                    connect(to_bytes(str(queue.popleft())))  # send message and queue.pop()
+                    # wait for packet to come back
                     continue
                 else:
-                    # send the received Packet to the next computer
-            elif is_token(packet)
-                if len(self.queue) > 0:  # if I want to send messages
-                    # send message and queue.pop()
-                # pass token
+                   # pass token
         '''
         pass
 
-    def connect(self, nickname, text=b"teste"):
+    def connect(self, text=b"teste"):
         self.sock.sendto(text, self.next_computer_address)
 
     def wait_connection(self):
@@ -106,7 +115,7 @@ print(pc1.wait_connection())
 
 from computer import Computer
 pc2 = Computer(('localhost', 6000), ('localhost', 5000))
-pc2.connect('', b"teste")
+pc2.connect(b"teste")
 
 """
 if __name__ == "__main__":
