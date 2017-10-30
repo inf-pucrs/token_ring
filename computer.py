@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import socket
-from typing import Tuple, Deque
+from typing import Tuple
 from collections import deque
 from packet import Packet
 
@@ -63,7 +63,7 @@ class Computer(object):
         self.sock.sendto(text, self.next_computer_address)
 
     def wait_connection(self):
-        incoming = self.sock.recv('1024')
+        incoming = self.sock.recv(1024)
         return incoming
 
     def pass_token(self):
@@ -85,12 +85,12 @@ openopen two ipython sessions and copypaste this
 (must cd token_ring first)
 
 from computer import Computer
-pc1 = Computer(('localhost', 5000), ('localhost', 6000))
+pc1 = Computer('Gian', ('0.0.0.0', 5000), ('10.32.143.194', 5000))
 print(pc1.wait_connection())
 
 from computer import Computer
-pc2 = Computer(('localhost', 6000), ('localhost', 5000))
-pc2.connect(b"teste")
+pc2 = Computer('nei', ('0.0.0.0', 5000), ('10.32.143.174', 5000))
+pc2.connect(b"testão")
 
 """
 # if __name__ == "__main__":
