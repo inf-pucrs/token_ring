@@ -4,6 +4,7 @@
 import socket
 from typing import Tuple
 from collections import deque
+from packet import Packet
 
 
 class Computer(object):
@@ -71,38 +72,6 @@ def read_file(file_path: str) -> list:
     with open(file_path) as setup_file:
         return list(setup_file)
 
-
-class Packet(object):
-    """Datagram: 2345;naocopiado:Bob:Alice:Oi Mundo!"""
-    """Datagram: iden;statuscopy;origin;destination;msg"""
-    """          0   ;1         ;2     ;3          ;4"""
-
-    def __init__(self, packet_type: int, origin_nick: str, dest_nick: str, text: str):
-        self.packet_type = packet_type
-        self.origin_nick = origin_nick
-        self.dest_nick = dest_nick
-        self.text = text
-        self.has_been_read = False
-
-    def is_token(self):
-        if self.packet_type == 1234:
-            return True
-        elif self.packet_type == 2345:
-            return False
-
-    def read(self):
-        self.has_been_read = True
-
-    def to_bytes(self):
-        return bytes(str(self), 'utf-8')
-
-    def _pprint(self):
-        return "{}\n{}\n{}\n{}\n{}".format(self.packet_type, self.read, self.dest_nick, self.dest_nick, self.text)
-
-    def __str__(self) -> str:
-        return "{}\n{}\n{}\n{}\n{}".format(
-            self.packet_type, self.has_been_read, self.dest_nick, self.dest_nick, self.text)
-        
 """
 To run on a single machine,
 openopen two ipython sessions and copypaste this
@@ -117,6 +86,5 @@ pc2 = Computer(('localhost', 6000), ('localhost', 5000))
 pc2.connect(b"teste")
 
 """
-if __name__ == "__main__":
-    pc3 = Computer(('localhost', 7000))
+# if __name__ == "__main__":
     # setup = read_file("")
