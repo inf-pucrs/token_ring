@@ -26,10 +26,13 @@ class Computer(object):
         
         self.next_computer_address = next_computer_address
         self.packet_queue = deque()
-        if tokenizer:
-            self.pass_token()
+        self.tokenizer = tokenizer
+
 
     def start(self):
+
+        if self.tokenizer:
+            self.pass_token()
 
         while True:
             packet = Packet(*str(self.wait_connection()).split(';'))  # get packets from socket, cast to str, split(';')
@@ -49,13 +52,15 @@ class Computer(object):
                     # Packet was not sent TO me nor sent BY me.
                     self.connect(packet.to_bytes())
             elif packet.is_token():
+                print("Recebi token")
                 if len(self.packet_queue) > 0:
                     # if I want to send messages
                     self.connect(self.packet_queue.popleft().to_bytes())
                     # wait for packet to come back
                     continue
                 else:
-                   self.pass_token()
+                    print("passando token")
+                    self.pass_token()
 
         pass
 
@@ -74,7 +79,7 @@ def read_file(file_path: str) -> list:
     '''
     <ip_destino_token>
     <apelido>
-    <tempo_token>
+    <tempo_token>to
     '''
     with open(file_path) as setup_file:
         return list(setup_file)
