@@ -37,8 +37,10 @@ class Computer(object):
             self.pass_token()
 
         while True:
-            packet = Packet(*str(self.wait_connection()).split(';'))  # get packets from socket, cast to str, split(';')
-            time.sleep(0.75)
+
+            pckt = self.wait_connection().decode('utf-8').split(';')
+            print(pckt)
+            packet = Packet(*pckt)  # get packets from socket, cast to str, split(';')
             if not packet.is_token():
                 if self.ny_nickname == packet.dest_nick:
                     # if I am the destination device of this packet
@@ -56,6 +58,7 @@ class Computer(object):
                     self.connect(packet.to_bytes())
             elif packet.is_token():
                 print("Recebi token")
+                time.sleep(5)
                 if len(self.packet_queue) > 0:
                     # if I want to send messages
                     self.connect(self.packet_queue.popleft().to_bytes())
