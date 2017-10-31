@@ -37,7 +37,7 @@ class Computer(object):
             self.pass_token()
 
         while True:
-
+            time.sleep(2)
             pckt = self.wait_connection().decode('utf-8').split(';')
             print(pckt)
             packet = Packet(*pckt)  # get packets from socket, cast to str, split(';')
@@ -48,26 +48,31 @@ class Computer(object):
                     self.connect(packet.to_bytes())  # send packet to next computer on the network
                 elif self.ny_nickname == packet.origin_nick:
                     # it means the packet I had sent to some computer on the network got back to me
-                    if packet.has_been_read:
+                    if packet.has_been_read == 'OK':
                         print('Packet was read by destination machine.')
-                        # pass token
+                        self.pass_token()
                     else:
                         print('Packet was NOT READ by destination.')
+                        self.pass_token()
                 else:
                     # Packet was not sent TO me nor sent BY me.
+                    print(packet, 'entrou naquele lugar ;)')
                     self.connect(packet.to_bytes())
             elif packet.is_token():
-                print("Recebi token")
-                time.sleep(5)
+                print("Recebi o token.")
                 if len(self.packet_queue) > 0:
                     # if I want to send messages
                     self.connect(self.packet_queue.popleft().to_bytes())
                     # wait for packet to come back
                     continue
                 else:
-                    print("passando token")
-                    self.pass_token()
-
+                    a = input('Digite o apelido dos computador de destino ou 0 para sair: ')
+                    if a == '0' or a == '':
+                        self.pass_token()
+                        continue
+                    text = input("Digite o texto a ser enviado: ")
+                    pkt = self.create_packet(a.strip(), text).to_bytes()
+                    self.connect(pkt)
         pass
 
     def connect(self, text: bytes=b"teste"):
@@ -77,7 +82,11 @@ class Computer(object):
         incoming = self.sock.recv(1024)
         return incoming
 
+    def create_packet(self, dest_nick: str, text: str):
+        return Packet('2345', '', self.ny_nickname, dest_nick, text)
+
     def pass_token(self):
+        print("Passando token ao", str(self.next_computer_address))
         self.connect(Packet('1234', '', '', '', '').to_bytes())
 
 
@@ -92,16 +101,20 @@ def read_file(file_path: str) -> list:
 
 """
 To run on a single machine,
-openopen two ipython sessions and copypaste this
+openopen three ipython sessions and copypaste this
 (must cd token_ring first)
 
 from computer import Computer
-pc1 = Computer('Gian', ('0.0.0.0', 5000), ('10.32.143.194', 5000))
-print(pc1.wait_connection())
+pc = Computer('Gian', ('0.0.0.0', 5000), ('localhost', 6000))
+pc.start()
 
 from computer import Computer
-pc2 = Computer('nei', ('0.0.0.0', 5000), ('10.32.143.174', 5000))
-pc2.connect(b"testão")
+pc = Computer('Nei', ('0.0.0.0', 6000), ('localhost', 7000))
+pc.start()
+
+from computer import Computer
+pc = Computer('João', ('0.0.0.0', 7000), ('localhost', 5000))
+pc.start()
 
 """
 # if __name__ == "__main__":
