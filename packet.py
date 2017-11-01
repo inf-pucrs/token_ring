@@ -1,3 +1,5 @@
+import random
+
 class Packet(object):
     """Datagram: 2345;naocopiado:Bob:Alice:Oi Mundo!"""
     """Datagram: iden;statuscopy;origin;destination;msg"""
@@ -18,7 +20,12 @@ class Packet(object):
             return False
 
     def read(self):
-        self.has_been_read = 'OK'
+        if self.dest_nick != "TODOS":
+            if random.randint(1, 10) < 3:
+                print("Erro na leitura.")
+                self.has_been_read = 'erro'
+            else:
+                self.has_been_read = 'OK'
 
     @staticmethod
     def assemble_token():
