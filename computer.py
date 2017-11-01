@@ -9,12 +9,11 @@ from collections import deque
 from packet import Packet
 
 
-
 class Computer(object):
     """xd"""
 
     def __init__(self, ny_nickname: str,
-                           my_socket_address: Tuple[str, int] = ('localhost', 5000),
+                 my_socket_address: Tuple[str, int] = ('localhost', 5000),
                  next_computer_address: Tuple[str, int] = ('localhost', 6000),
                  tokenizer: bool=False):
         """
@@ -49,14 +48,15 @@ class Computer(object):
         
         
     def token_thread(self):
+        print("Iniciou a thread token:")
         while True:
-            print("iniciou a thread token")
             #iniciar thread para enviar receber token
+            # get packets from socket, cast to str, split(';')
             pckt = self.wait_connection().decode('utf-8').split(';')
             time.sleep(1)
-            print(pckt)
-            packet = Packet(*pckt)  # get packets from socket, cast to str, split(';')
+            packet = Packet(*pckt)
             if not packet.is_token():
+                print(pckt)
                 if self.ny_nickname == packet.dest_nick:
                     # if I am the destination device of this packet
                     packet.read()  # mark packet as read "OK"
@@ -67,11 +67,10 @@ class Computer(object):
                         print('Packet was read by destination machine.')
                         self.pass_token()
                     else:
-                        print('Packet was NOT READ by destination.')
+                        print("### Packet was NOT READ ###")
                         self.pass_token()
                 else:
                     # Packet was not sent TO me nor sent BY me.
-                    print(packet, 'entrou naquele lugar ;)')
                     self.connect(packet.to_bytes())
             elif packet.is_token():
                 print("Recebi o token.")
@@ -87,13 +86,13 @@ class Computer(object):
 
     def chat_thread(self):
         while True:
-            a = input('Digite o apelido dos computador de destino ou 0 para sair: ')
-            
+            a = input('Digite o apelido do computador de destino: ')
+            if a == '':
+                break
             text = input("Digite o texto a ser enviado: ")
-            pkt = self.create_packet(a.strip(), text).to_bytes()
+            pkt = self.create_packet(a.strip(), text)
             self.packet_queue.append(pkt)
-        
-        
+
     def connect(self, text: bytes=b"teste"):
         self.sock.sendto(text, self.next_computer_address)
 
