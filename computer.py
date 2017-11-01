@@ -3,6 +3,7 @@
 
 import socket
 import time
+import threading
 from typing import Tuple
 from collections import deque
 from packet import Packet
@@ -25,55 +26,99 @@ class Computer(object):
         self.my_socket_address = my_socket_address
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(self.my_socket_address)
-        
+
         self.next_computer_address = next_computer_address
         self.packet_queue = deque()
         self.tokenizer = tokenizer
-
+        self.lock = threading.Lock()
+        self.threads = []
 
     def start(self):
 
         if self.tokenizer:
             self.pass_token()
 
+        chat = threading.Thread(target=self.chat_thread())
+        token = threading.Thread(target=self.token_thread())
+        self.threads.append(chat)
+        self.threads.append(token)
+        token.start()
+        chat.start()
+
+    def token_thread(self):
+        print("Iniciou a thread token:")
+        num_reenvio = 0
         while True:
-            time.sleep(2)
+            #iniciar thread para enviar receber token
+            # get packets from socket, cast to str, split(';')
             pckt = self.wait_connection().decode('utf-8').split(';')
-            print(pckt)
-            packet = Packet(*pckt)  # get packets from socket, cast to str, split(';')
+            time.sleep(2)
+            packet = Packet(*pckt)
+
             if not packet.is_token():
+                print(pckt)
+
+                # if I am the destination device of this packet
                 if self.ny_nickname == packet.dest_nick:
-                    # if I am the destination device of this packet
-                    packet.read()  # mark packet as read "OK"
-                    self.connect(packet.to_bytes())  # send packet to next computer on the network
+                    print("I've received a packet from: {}. It said: {}".format(
+                        packet.origin_nick, packet.text))
+                    # mark packet as read "OK"
+                    packet.read()
+                    # send packet to next computer on the network
+                    self.connect(packet.to_bytes())
+
+                # if the packet I had sent to a computer on the network got back to me
                 elif self.ny_nickname == packet.origin_nick:
-                    # it means the packet I had sent to some computer on the network got back to me
-                    if packet.has_been_read == 'OK':
+                    if packet.dest_nick == "TODOS":
+                        self.pass_token()
+                    elif packet.has_been_read == 'OK':
                         print('Packet was read by destination machine.')
                         self.pass_token()
+                    elif packet.has_been_read == 'erro':
+                        print("Pacote chegou com erro.")
+                        if num_reenvio < 1:
+                            print("Pacote será reenviado.")
+                            packet.has_been_read = 'nãocopiado'
+                            self.connect(packet.to_bytes())
+                            num_reenvio += 1
+                        else:
+                            print("Pacote chegou com erro de novo e será descartado.")
+                            self.pass_token()
                     else:
-                        print('Packet was NOT READ by destination.')
+                        print("### Packet was NOT READ ###")
                         self.pass_token()
-                else:
-                    # Packet was not sent TO me nor sent BY me.
-                    print(packet, 'entrou naquele lugar ;)')
+
+                # careful with this conditional. it must be tested after the previous one.
+                elif packet.dest_nick == "TODOS":
+                    print("I've received a broadcast packet from: {}. It said: {}".format(
+                        packet.origin_nick, packet.text))
                     self.connect(packet.to_bytes())
+
+                # Packet was not sent TO me nor sent BY me.
+                else:
+                    self.connect(packet.to_bytes())
+
             elif packet.is_token():
                 print("Recebi o token.")
                 if len(self.packet_queue) > 0:
                     # if I want to send messages
+                    print("Vou enviar uma mensagem.")
                     self.connect(self.packet_queue.popleft().to_bytes())
                     # wait for packet to come back
                     continue
                 else:
-                    a = input('Digite o apelido dos computador de destino ou 0 para sair: ')
-                    if a == '0' or a == '':
-                        self.pass_token()
-                        continue
-                    text = input("Digite o texto a ser enviado: ")
-                    pkt = self.create_packet(a.strip(), text).to_bytes()
-                    self.connect(pkt)
+                    print("Minha fila está vazia.")
+                    self.pass_token()
         pass
+
+    def chat_thread(self):
+        while True:
+            a = input('Digite o apelido do computador de destino: ')
+            if a == '':
+                break
+            text = input("Digite o texto a ser enviado: ")
+            pkt = self.create_packet(a.strip(), text)
+            self.packet_queue.append(pkt)
 
     def connect(self, text: bytes=b"teste"):
         self.sock.sendto(text, self.next_computer_address)
@@ -83,21 +128,22 @@ class Computer(object):
         return incoming
 
     def create_packet(self, dest_nick: str, text: str):
-        return Packet('2345', '', self.ny_nickname, dest_nick, text)
+        return Packet('2345', 'nãocopiado', self.ny_nickname, dest_nick, text)
 
     def pass_token(self):
-        print("Passando token ao", str(self.next_computer_address))
-        self.connect(Packet('1234', '', '', '', '').to_bytes())
+        print("Sending token to", str(self.next_computer_address))
+        self.connect(Packet('1234', 'nãocopiado', '', '', '').to_bytes())
 
 
 def read_file(file_path: str) -> list:
-    '''
+    """
     <ip_destino_token>
     <apelido>
     <tempo_token>to
-    '''
+    """
     with open(file_path) as setup_file:
         return list(setup_file)
+
 
 """
 To run on a single machine,
@@ -109,7 +155,7 @@ pc = Computer('Gian', ('0.0.0.0', 5000), ('localhost', 6000))
 pc.start()
 
 from computer import Computer
-pc = Computer('Nei', ('0.0.0.0', 6000), ('localhost', 7000))
+pc = Computer('Nei', ('0.0.0.0', 6000), ('localhost', 5000))
 pc.start()
 
 from computer import Computer
