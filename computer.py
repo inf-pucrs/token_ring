@@ -70,7 +70,6 @@ class Computer(object):
                 # if the packet I had sent to a computer on the network got back to me
                 elif self.ny_nickname == packet.origin_nick:
                     if packet.dest_nick == "TODOS":
-                        print('entrou')
                         self.pass_token()
                     elif packet.has_been_read == 'OK':
                         print('Packet was read by destination machine.')
@@ -94,7 +93,7 @@ class Computer(object):
                     print("I've received a broadcast packet from: {}. It said: {}".format(
                         packet.origin_nick, packet.text))
                     self.connect(packet.to_bytes())
-                    
+
                 # Packet was not sent TO me nor sent BY me.
                 else:
                     self.connect(packet.to_bytes())
