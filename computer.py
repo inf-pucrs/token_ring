@@ -147,20 +147,23 @@ def read_file(file_path: str) -> list:
 
 """
 To run on a single machine,
-openopen three ipython sessions and copypaste this
+open three ipython sessions and copypaste this
 (must cd token_ring first)
 
 from computer import Computer
-pc = Computer('Gian', ('0.0.0.0', 5000), ('localhost', 6000))
+pc = Computer('Gian', ('0.0.0.0', 5000), ('localhost', 6000),True)
 pc.start()
 
 from computer import Computer
-pc = Computer('Nei', ('0.0.0.0', 6000), ('localhost', 5000))
+pc = Computer('Nei', ('0.0.0.0', 6000), ('localhost', 7000))
 pc.start()
 
 from computer import Computer
 pc = Computer('João', ('0.0.0.0', 7000), ('localhost', 5000))
 pc.start()
+
+Done with sending your texts, press Enter to leave a blank destination 
+to start the token thread   
 
 """
 # if __name__ == "__main__":
